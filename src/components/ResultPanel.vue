@@ -4,7 +4,7 @@
     
     <!-- 空状态 -->
     <a-empty
-      v-if="!recommendation && !selectedZoneId"
+      v-if="!aiResponse && !selectedZoneId"
       description="请输入需求并获取AI推荐"
       :image="simpleImage"
     />
@@ -14,10 +14,21 @@
       <a-spin size="large" tip="AI正在分析您的需求..." />
     </div>
     
-    <!-- 推荐结果 -->
+    <!-- AI响应结果 -->
     <template v-else>
+      <!-- 非推荐类响应（对话、预约、兜底） -->
+      <a-alert
+        v-if="aiResponse && aiResponse.type !== 'recommendation'"
+        :message="getResponseTitle(aiResponse.type)"
+        :description="aiResponse.content"
+        :type="getAlertType(aiResponse.type)"
+        show-icon
+        closable
+        class="response-alert"
+      />
+      
       <!-- AI推荐卡片 -->
-      <a-card v-if="recommendation" class="recommendation-card" :bordered="true">
+      <a-card v-if="aiResponse?.recommendation" class="recommendation-card" :bordered="true">
         <template #title>
           <div class="card-header">
             <span>✅ 推荐区域</span>
@@ -95,10 +106,12 @@ import { computed } from 'vue'
 import { Empty } from 'ant-design-vue'
 import { useAppStore } from '@/store/appStore'
 import { campusZones } from '@/data/campusZones'
+import type { AIResponse } from '@/services/aiService'
 
 const store = useAppStore()
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 
+const aiResponse = computed(() => store.aiResponse)
 const recommendation = computed(() => store.recommendation)
 const isLoading = computed(() => store.isLoading)
 const selectedZoneId = computed(() => store.selectedZoneId)
@@ -117,6 +130,25 @@ const recommendedClassrooms = computed(() => {
 
 function getZoneName(zoneId: string): string {
   return campusZones.find(z => z.id === zoneId)?.name || zoneId
+}
+
+function getResponseTitle(type: AIResponse['type']): string {
+  const titles: Record<AIResponse['type'], string> = {
+    recommendation: '✅ 推荐结果',
+    booking: '📅 预约请求',
+    chat: '💬 对话回复',
+    fallback: '❓ 需要更多信息',
+  }
+  return titles[type] || 'AI 回复'
+}
+
+function getAlertType(type: AIResponse['type']): 'success' | 'info' | 'warning' {
+  switch (type) {
+    case 'booking': return 'info'
+    case 'chat': return 'success'
+    case 'fallback': return 'warning'
+    default: return 'info'
+  }
 }
 </script>
 
@@ -139,6 +171,10 @@ function getZoneName(zoneId: string): string {
   align-items: center;
   justify-content: center;
   min-height: 200px;
+}
+
+.response-alert {
+  margin-bottom: 16px;
 }
 
 .card-header {

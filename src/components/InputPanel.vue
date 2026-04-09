@@ -41,7 +41,7 @@
 import { computed } from 'vue'
 import { SendOutlined } from '@ant-design/icons-vue'
 import { useAppStore } from '@/store/appStore'
-import { getAIRecommendation } from '@/services/aiService'
+import { getAIRecommendation, processUserQuery } from '@/services/aiService'
 
 const store = useAppStore()
 
@@ -57,10 +57,10 @@ async function handleSubmit() {
   
   store.setLoading(true)
   try {
-    const recommendation = await getAIRecommendation(userInput.value)
-    store.setRecommendation(recommendation)
+    const response = await processUserQuery(userInput.value)
+    store.setAIResponse(response)
   } catch (error) {
-    console.error('AI推荐失败:', error)
+    console.error('AI处理失败:', error)
   } finally {
     store.setLoading(false)
   }
