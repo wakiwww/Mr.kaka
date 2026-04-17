@@ -4,14 +4,14 @@
     <p class="map-desc">点击区域查看详情，推荐区域会高亮显示</p>
     
     <div class="map-container">
-      <svg viewBox="0 0 600 420" class="map-svg">
-        <!-- 背景网格 -->
+      <svg viewBox="0 0 720 780" class="map-svg" @click="clearSelection">
+        <!-- 辅助网格 -->
         <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#eee" stroke-width="0.5"/>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f0f0f0" stroke-width="1"/>
           </pattern>
         </defs>
-        <rect width="600" height="420" fill="url(#grid)" />
+        <rect width="720" height="780" fill="url(#grid)" />
         
         <!-- 渲染所有区域 -->
         <g v-for="zone in zones" :key="zone.id">
@@ -25,7 +25,7 @@
             stroke-width="3"
             rx="8"
             class="zone-rect"
-            @click="handleZoneClick(zone.id)"
+            @click.stop="handleZoneClick(zone.id)"
             @mouseenter="handleZoneHover(zone.id)"
             @mouseleave="handleZoneLeave"
           />
@@ -36,6 +36,7 @@
             dominant-baseline="middle"
             class="zone-label"
             :fill="selectedZoneId === zone.id ? '#fff' : '#333'"
+            @click.stop="handleZoneClick(zone.id)"
           >
             {{ zone.name }}
           </text>
@@ -46,6 +47,7 @@
             dominant-baseline="middle"
             class="zone-capacity"
             :fill="selectedZoneId === zone.id ? '#fff' : '#666'"
+            @click.stop="handleZoneClick(zone.id)"
           >
             {{ zone.totalCapacity }}座
           </text>
@@ -53,6 +55,9 @@
       </svg>
     </div>
     
+    <!-- 侧边详情抽屉 -->
+    <ZoneDetailDrawer />
+
     <!-- 图例 -->
     <div class="legend">
       <div v-for="zone in zones" :key="zone.id" class="legend-item">
@@ -67,6 +72,7 @@
 import { computed } from 'vue'
 import { useAppStore } from '@/store/appStore'
 import { campusZones } from '@/data/campusZones'
+import ZoneDetailDrawer from './ZoneDetailDrawer.vue'
 
 const store = useAppStore()
 
@@ -75,28 +81,32 @@ const highlightedZoneId = computed(() => store.highlightedZoneId)
 const selectedZoneId = computed(() => store.selectedZoneId)
 
 function getZoneFill(zoneId: string): string {
-  const zone = campusZones.find(z => z.id === zoneId)
   if (selectedZoneId.value === zoneId) {
-    return zone?.color || '#ccc'
+    return '#000000'
   }
   if (highlightedZoneId.value === zoneId) {
-    return '#fff7e6'
+    return '#f0f0f0'
   }
-  return '#fafafa'
+  return '#ffffff'
 }
 
 function getZoneStroke(zoneId: string): string {
   if (selectedZoneId.value === zoneId) {
-    return '#000'
+    return '#000000'
   }
   if (highlightedZoneId.value === zoneId) {
-    return '#faad14'
+    // 高亮时使用粗边框
+    return '#000000'
   }
-  return '#ddd'
+  return '#e5e5e5'
 }
 
 function handleZoneClick(zoneId: string) {
   store.setSelectedZone(zoneId === selectedZoneId.value ? null : zoneId)
+}
+
+function clearSelection() {
+  store.setSelectedZone(null)
 }
 
 function handleZoneHover(zoneId: string) {
@@ -120,15 +130,24 @@ function handleZoneLeave() {
 }
 
 .map-title {
-  font-size: 18px;
-  color: #333;
-  margin: 0 0 4px 0;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 16px;
+  color: #000;
+  margin: 0;
+  z-index: 10;
+  font-weight: 700;
 }
 
 .map-desc {
-  color: #666;
-  font-size: 13px;
-  margin: 0 0 12px 0;
+  position: absolute;
+  top: 40px;
+  left: 16px;
+  color: #888;
+  font-size: 11px;
+  margin: 0;
+  z-index: 10;
 }
 
 .map-container {
@@ -136,49 +155,64 @@ function handleZoneLeave() {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: 0;
+  padding: 60px; /* Bring back breathing room */
+  background: radial-gradient(circle, #fdfdfd 0%, #ffffff 100%);
 }
 
 .map-svg {
   width: 100%;
-  max-width: 600px;
-  height: auto;
+  height: auto; /* Change to auto with max-width for better scaling */
+  max-width: 900px;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.04));
 }
 
 .zone-rect {
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  stroke-linejoin: round;
 }
 
 .zone-rect:hover {
-  filter: brightness(0.95);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
 }
 
 .zone-label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   pointer-events: none;
+  letter-spacing: -0.01em;
 }
 
 .zone-capacity {
-  font-size: 12px;
+  font-size: 11px;
   pointer-events: none;
+  opacity: 0.6;
 }
 
 .legend {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  z-index: 10;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #666;
+  gap: 8px;
+  font-size: 11px;
+  color: #333;
 }
 
 .legend-dot {

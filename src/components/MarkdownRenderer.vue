@@ -26,7 +26,7 @@ const renderedHtml = computed(() => {
 .markdown-body {
   font-size: 14px;
   line-height: 1.6;
-  color: #2c3e50;
+  color: #000000;
   word-break: break-word;
 }
 
@@ -39,8 +39,8 @@ const renderedHtml = computed(() => {
 }
 
 .markdown-body strong {
-  color: #1890ff;
-  font-weight: 600;
+  color: #000000;
+  font-weight: 700;
 }
 
 .markdown-body ul, .markdown-body ol {
@@ -53,10 +53,10 @@ const renderedHtml = computed(() => {
 }
 
 .markdown-body code {
-  background-color: #f0f2f5;
-  padding: 2px 4px;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9em;
 }
 

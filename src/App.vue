@@ -2,42 +2,48 @@
   <div class="app-container">
     <!-- 导航栏 -->
     <nav class="app-nav">
-      <button 
-        :class="{ active: currentView === 'main' }"
-        @click="currentView = 'main'"
-      >
-        🏫 主界面
-      </button>
-      <button 
-        :class="{ active: currentView === 'test' }"
-        @click="currentView = 'test'"
-      >
-        🤖 工作流测试
-      </button>
+      <div class="nav-left">
+        <button 
+          :class="{ active: currentView === 'main' }"
+          @click="currentView = 'main'"
+        >
+          🏫 智能调度
+        </button>
+        <button 
+          :class="{ active: currentView === 'overview' }"
+          @click="currentView = 'overview'"
+        >
+          📊 场所总览
+        </button>
+      </div>
+      <div class="nav-right">
+        <button 
+          :class="{ active: currentView === 'test' }"
+          @click="currentView = 'test'"
+        >
+          🤖 工作流调试
+        </button>
+      </div>
     </nav>
     
     <!-- 主视图 -->
     <div v-if="currentView === 'main'" class="app-main-view">
-      <header class="app-header">
-        <h1>🏫 智慧校园调度系统</h1>
-        <p>基于AI的智能教室推荐与调度平台</p>
-      </header>
-      
       <main class="app-main">
-        <div class="left-panel">
-          <InputPanel />
-        </div>
-        
-        <div class="center-panel">
+        <div class="map-section">
           <CampusMap />
         </div>
         
-        <div class="right-panel">
-          <ResultPanel />
+        <div class="chat-section">
+          <ChatPanel />
         </div>
       </main>
     </div>
     
+    <!-- 场所总览 -->
+    <div v-else-if="currentView === 'overview'" class="overview-view">
+      <BookingOverview />
+    </div>
+
     <!-- 测试视图 -->
     <div v-else class="test-view">
       <WorkflowTest />
@@ -64,13 +70,13 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { QuestionOutlined } from '@ant-design/icons-vue'
 import { useAppStore } from '@/store/appStore'
 import { socketService } from '@/services/socketService'
-import InputPanel from './components/InputPanel.vue'
 import CampusMap from './components/CampusMap.vue'
-import ResultPanel from './components/ResultPanel.vue'
 import WorkflowTest from './components/WorkflowTest.vue'
 import UsageInstructions from './components/UsageInstructions.vue'
+import BookingOverview from './components/BookingOverview.vue'
+import ChatPanel from './components/ChatPanel.vue'
 
-const currentView = ref<'main' | 'test'>('main')
+const currentView = ref<'main' | 'test' | 'overview'>('main')
 const instructionsRef = ref<any>(null)
 const store = useAppStore()
 
@@ -87,11 +93,11 @@ onMounted(async () => {
       },
       onReply: (msg) => {
         if (!msg.isFromSelf) {
-          store.setLoading(false) // 收到回复，停止加载动画
+          store.setLoading(false)
           store.setStreaming(true)
           store.appendAIContent(msg.content)
           if (msg.isFinal) {
-            store.setStreaming(false)
+            store.stopStreaming()
           }
         }
       },
@@ -115,74 +121,132 @@ onUnmounted(() => {
   right: 24px;
   bottom: 24px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #000 !important;
+  border-color: #000 !important;
 }
 
 .app-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .app-nav {
   display: flex;
-  gap: 16px;
-  padding: 12px 24px;
-  background: white;
-  border-bottom: 1px solid #f0f0f0;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  gap: 8px;
 }
 
 .app-nav button {
-  padding: 8px 16px;
+  padding: 6px 16px;
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.3s;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+
+.app-nav button:hover {
+  background: #f5f5f5;
+  color: #000;
 }
 
 .app-nav button.active {
-  background: #e6f7ff;
-  color: #1890ff;
-  font-weight: 600;
+  background: #000000;
+  color: #ffffff;
 }
 
 .app-main-view {
   flex: 1;
   display: flex;
-  flex-direction: column;
-}
-
-.app-header {
-  padding: 16px 24px;
-  background: white;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.app-header p {
-  margin: 4px 0 0;
-  color: #8c8c8c;
+  overflow: hidden;
 }
 
 .app-main {
   flex: 1;
   display: flex;
-  padding: 24px;
-  gap: 24px;
-  background: #f0f2f5;
+  padding: 0;
+  gap: 0;
+  background: #ffffff;
 }
 
-.left-panel { width: 320px; background: white; padding: 20px; border-radius: 8px; }
-.center-panel { flex: 1; background: white; padding: 20px; border-radius: 8px; }
-.right-panel { width: 360px; background: white; padding: 20px; border-radius: 8px; }
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
 
-.test-view {
+.view-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.status-indicators {
+  font-size: 12px;
+  color: #888;
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #ff4d4f;
+  border-radius: 50%;
+}
+
+.dot.connected {
+  background: #52c41a;
+  box-shadow: 0 0 8px rgba(82, 196, 26, 0.4);
+}
+
+.map-section {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+.chat-section {
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  min-width: 400px;
+}
+
+.test-view, .overview-view {
   flex: 1;
-  padding: 24px;
-  background: #f0f2f5;
+  padding: 0;
+  background: #ffffff;
+  overflow-y: auto;
 }
 </style>
