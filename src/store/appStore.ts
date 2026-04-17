@@ -11,10 +11,20 @@ export const useAppStore = defineStore('app', () => {
   const highlightedZoneId = ref<string | null>(null)
   const selectedZoneId = ref<string | null>(null)
   const isLoading = ref(false)
+  const isStreaming = ref(false)
+  const socketConnected = ref(false)
 
   // Actions
   function setUserInput(input: string) {
     userInput.value = input
+  }
+
+  function setSocketStatus(connected: boolean) {
+    socketConnected.value = connected
+  }
+
+  function setStreaming(streaming: boolean) {
+    isStreaming.value = streaming
   }
 
   function setRecommendation(rec: AIRecommendation | null) {
@@ -32,6 +42,16 @@ export const useAppStore = defineStore('app', () => {
     } else {
       recommendation.value = null
     }
+  }
+
+  /**
+   * 追加流式内容
+   */
+  function appendAIContent(chunk: string) {
+    if (!aiResponse.value) {
+      aiResponse.value = { content: '', type: 'chat' }
+    }
+    aiResponse.value.content += chunk
   }
 
   function setHighlightedZone(zoneId: string | null) {
@@ -53,6 +73,7 @@ export const useAppStore = defineStore('app', () => {
     highlightedZoneId.value = null
     selectedZoneId.value = null
     isLoading.value = false
+    isStreaming.value = false
   }
 
   return {
@@ -62,9 +83,14 @@ export const useAppStore = defineStore('app', () => {
     highlightedZoneId,
     selectedZoneId,
     isLoading,
+    isStreaming,
+    socketConnected,
     setUserInput,
+    setSocketStatus,
+    setStreaming,
     setRecommendation,
     setAIResponse,
+    appendAIContent,
     setHighlightedZone,
     setSelectedZone,
     setLoading,

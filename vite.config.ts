@@ -9,4 +9,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/tencent-api': {
+        target: 'https://lke.tencentcloudapi.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tencent-api/, '')
+      }
+    }
+  }
 })

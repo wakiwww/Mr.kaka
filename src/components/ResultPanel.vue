@@ -17,15 +17,19 @@
     <!-- AI响应结果 -->
     <template v-else>
       <!-- 非推荐类响应（对话、预约、兜底） -->
-      <a-alert
+      <div
         v-if="aiResponse && aiResponse.type !== 'recommendation'"
-        :message="getResponseTitle(aiResponse.type)"
-        :description="aiResponse.content"
-        :type="getAlertType(aiResponse.type)"
-        show-icon
-        closable
-        class="response-alert"
-      />
+        class="ai-chat-bubble"
+      >
+        <div class="bubble-header">
+          <div class="bot-icon">🤖</div>
+          <span class="bubble-title">{{ getResponseTitle(aiResponse.type) }}</span>
+          <div v-if="isStreaming" class="streaming-dot"></div>
+        </div>
+        <div class="bubble-content">
+          <MarkdownRenderer :content="aiResponse.content" />
+        </div>
+      </div>
       
       <!-- AI推荐卡片 -->
       <a-card v-if="aiResponse?.recommendation" class="recommendation-card" :bordered="true">
@@ -106,7 +110,7 @@ import { computed } from 'vue'
 import { Empty } from 'ant-design-vue'
 import { useAppStore } from '@/store/appStore'
 import { campusZones } from '@/data/campusZones'
-import type { AIResponse } from '@/services/aiService'
+import MarkdownRenderer from './MarkdownRenderer.vue'
 
 const store = useAppStore()
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -114,6 +118,7 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const aiResponse = computed(() => store.aiResponse)
 const recommendation = computed(() => store.recommendation)
 const isLoading = computed(() => store.isLoading)
+const isStreaming = computed(() => store.isStreaming)
 const selectedZoneId = computed(() => store.selectedZoneId)
 
 const selectedZone = computed(() => {
@@ -171,6 +176,57 @@ function getAlertType(type: AIResponse['type']): 'success' | 'info' | 'warning' 
   align-items: center;
   justify-content: center;
   min-height: 200px;
+}
+
+.ai-chat-bubble {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #edf2f7;
+}
+
+.bot-icon {
+  font-size: 20px;
+}
+
+.bubble-title {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.streaming-dot {
+  width: 8px;
+  height: 8px;
+  background: #1890ff;
+  border-radius: 50%;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+.bubble-content {
+  color: #2d3748;
 }
 
 .response-alert {

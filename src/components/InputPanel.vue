@@ -41,7 +41,7 @@
 import { computed } from 'vue'
 import { SendOutlined } from '@ant-design/icons-vue'
 import { useAppStore } from '@/store/appStore'
-import { getAIRecommendation, processUserQuery } from '@/services/aiService'
+import { socketService } from '@/services/socketService'
 
 const store = useAppStore()
 
@@ -51,17 +51,23 @@ const userInput = computed({
 })
 
 const isLoading = computed(() => store.isLoading)
+const socketConnected = computed(() => store.socketConnected)
 
 async function handleSubmit() {
-  if (!userInput.value.trim() || isLoading.value) return
+  if (!userInput.value.trim() || isLoading.value || !socketConnected.value) return
   
   store.setLoading(true)
+  store.setAIResponse(null) // 清空旧响应
+  
   try {
-    const response = await processUserQuery(userInput.value)
-    store.setAIResponse(response)
+    // 通过 WebSocket 发送需求
+    socketService.sendMessage(userInput.value)
+    // 注意：结果将通过 App.vue 中注册的 onReply 回调更新到 store
   } catch (error) {
     console.error('AI处理失败:', error)
-  } finally {
+    store.setAIResponse({
+      content: '抱歉，服务暂时不可用，请检查连接。'
+    })
     store.setLoading(false)
   }
 }
