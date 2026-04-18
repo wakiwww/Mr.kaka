@@ -3,7 +3,7 @@
     <div v-if="selectedZone" class="zone-drawer">
       <header class="drawer-header">
         <div class="header-main">
-          <h2>{{ selectedZone.name }}</h2>
+          <h2>{{ selectedZone.emoji }} {{ selectedZone.name }}</h2>
           <span class="room-count">{{ selectedZone.classrooms.length }} 间教室</span>
         </div>
         <button class="close-btn" @click="closeDrawer">
@@ -88,12 +88,8 @@ function getStatusText(status: string) {
 }
 
 function handleBook(roomId: string) {
-  const success = store.addBooking(roomId, '地图侧滑舱快捷预约')
-  if (success) {
-    message.success(`已成功预约教室: ${roomId}`)
-  } else {
-    message.error('该教室已被占用，请选择其他时段')
-  }
+  // 不再直接建立预约，而是打开带有时间选择器的弹窗
+  store.openBookingModal(roomId)
 }
 </script>
 

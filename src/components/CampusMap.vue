@@ -38,7 +38,7 @@
             :fill="selectedZoneId === zone.id ? '#fff' : '#333'"
             @click.stop="handleZoneClick(zone.id)"
           >
-            {{ zone.name }}
+            {{ zone.emoji }} {{ zone.name }}
           </text>
           <text
             :x="zone.position.x + zone.position.width / 2"
@@ -58,10 +58,10 @@
     <!-- 侧边详情抽屉 -->
     <ZoneDetailDrawer />
 
-    <!-- 图例 -->
+    <!-- 图例 (Emoji 升级版) -->
     <div class="legend">
       <div v-for="zone in zones" :key="zone.id" class="legend-item">
-        <span class="legend-dot" :style="{ backgroundColor: zone.color }"></span>
+        <span class="legend-emoji">{{ zone.emoji }}</span>
         <span>{{ zone.name }}</span>
       </div>
     </div>
@@ -210,14 +210,14 @@ function handleZoneLeave() {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 11px;
   color: #333;
 }
 
-.legend-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+.legend-emoji {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
 }
 </style>

@@ -62,6 +62,9 @@
     >
       <template #icon><QuestionOutlined /></template>
     </a-button>
+    
+    <!-- 全局预约弹窗 -->
+    <BookingModal />
   </div>
 </template>
 
@@ -75,6 +78,7 @@ import WorkflowTest from './components/WorkflowTest.vue'
 import UsageInstructions from './components/UsageInstructions.vue'
 import BookingOverview from './components/BookingOverview.vue'
 import ChatPanel from './components/ChatPanel.vue'
+import BookingModal from './components/BookingModal.vue'
 
 const currentView = ref<'main' | 'test' | 'overview'>('main')
 const instructionsRef = ref<any>(null)

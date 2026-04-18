@@ -12,6 +12,11 @@ export const useAppStore = defineStore('app', () => {
   const isStreaming = ref(false)
   const socketConnected = ref(false)
   
+  // 预约弹窗状态
+  const bookingModalVisible = ref(false)
+  const bookingRoomId = ref<string | null>(null)
+  const bookingInitialTimes = ref<{ start: string; end: string } | null>(null)
+  
   // 视图模式 ('map' | 'overview')
   const currentView = ref<'map' | 'overview' | 'test'>('map')
   
@@ -113,31 +118,68 @@ export const useAppStore = defineStore('app', () => {
     isStreaming.value = streaming
   }
 
-  // 预约逻辑
-  function addBooking(roomId: string, user: string = '当前用户') {
+  function openBookingModal(roomId: string, times?: { start: string; end: string }) {
+    bookingRoomId.value = roomId
+    bookingInitialTimes.value = times || null
+    bookingModalVisible.value = true
+  }
+
+  function closeBookingModal() {
+    bookingModalVisible.value = false
+    bookingRoomId.value = null
+    bookingInitialTimes.value = null
+  }
+
+  // 预约逻辑 (支持自定义时间段)
+  function addBooking(roomId: string, startTime: string, endTime: string, user: string = '当前用户') {
     const room = allClassrooms.value.find(r => r.id === roomId)
-    if (!room || room.status !== 'available') return false
+    if (!room) return false
+
+    // 基础碰撞检测：检查目标时段是否与现有预约重叠
+    const isOverlapping = bookings.value.some(b => {
+      if (b.roomId !== roomId || b.status === 'cancelled') return false
+      
+      const bStart = new Date(b.startTime).getTime()
+      const bEnd = new Date(b.endTime).getTime()
+      const nStart = new Date(startTime).getTime()
+      const nEnd = new Date(endTime).getTime()
+      
+      return (nStart < bEnd && nEnd > bStart)
+    })
+
+    if (isOverlapping) return false
 
     const newBooking: Booking = {
       id: `bk-${Date.now()}`,
       roomId,
       roomName: room.name,
       user,
-      startTime: new Date().toISOString(),
-      endTime: new Date(Date.now() + 3600000).toISOString(),
+      startTime,
+      endTime,
       status: 'confirmed'
     }
 
     bookings.value.push(newBooking)
     
-    // 更新教室状态
-    zones.value.forEach(z => {
-      z.classrooms.forEach(r => {
-        if (r.id === roomId) r.status = 'booked'
-      })
-    })
+    // 更新教室实时状态 (基于当前时间判断是否正在使用)
+    updateRoomStatuses()
 
     return true
+  }
+
+  function updateRoomStatuses() {
+    const now = Date.now()
+    zones.value.forEach(z => {
+      z.classrooms.forEach(r => {
+        const isCurrentlyBooked = bookings.value.some(b => 
+          b.roomId === r.id && 
+          b.status === 'confirmed' &&
+          new Date(b.startTime).getTime() <= now &&
+          new Date(b.endTime).getTime() >= now
+        )
+        r.status = isCurrentlyBooked ? 'booked' : 'available'
+      })
+    })
   }
 
   return {
@@ -162,6 +204,12 @@ export const useAppStore = defineStore('app', () => {
     setLoading,
     setStreaming,
     toggleView,
-    addBooking
+    addBooking,
+    updateRoomStatuses,
+    bookingModalVisible,
+    bookingRoomId,
+    bookingInitialTimes,
+    openBookingModal,
+    closeBookingModal
   }
 })

@@ -22,6 +22,7 @@ export interface Booking {
 export interface Zone {
   id: string;
   name: string;
+  emoji: string;
   classrooms: Classroom[];
   equipment: string[];
   totalCapacity: number;

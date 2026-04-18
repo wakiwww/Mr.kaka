@@ -4,6 +4,7 @@ export const campusZones: Zone[] = [
   {
     id: 'teaching-a',
     name: '教学楼A区',
+    emoji: '🏫',
     color: '#1890ff',
     position: { x: 20, y: 30, width: 220, height: 260 },
     equipment: ['投影仪', '空调', '数字扩音'],
@@ -19,6 +20,7 @@ export const campusZones: Zone[] = [
   {
     id: 'science-b',
     name: '实验大楼B区',
+    emoji: '🧪',
     color: '#52c41a',
     position: { x: 260, y: 30, width: 220, height: 260 },
     equipment: ['RTX工作站', '通风橱', '实验台'],
@@ -33,6 +35,7 @@ export const campusZones: Zone[] = [
   {
     id: 'library',
     name: '中心图书馆',
+    emoji: '📚',
     color: '#722ed1',
     position: { x: 20, y: 320, width: 220, height: 220 },
     equipment: ['静音舱', '自助借还', '数据库终端'],
@@ -46,6 +49,7 @@ export const campusZones: Zone[] = [
   {
     id: 'arts-center',
     name: '艺术中心',
+    emoji: '🎭',
     color: '#faad14',
     position: { x: 260, y: 320, width: 220, height: 220 },
     equipment: ['专业音响', '木地板', '钢琴'],
@@ -59,6 +63,7 @@ export const campusZones: Zone[] = [
   {
     id: 'stadium',
     name: '体育综合体',
+    emoji: '🏟️',
     color: '#ff4d4f',
     position: { x: 500, y: 30, width: 200, height: 510 },
     equipment: ['计分板', '跑步机', '监控系统'],
@@ -72,6 +77,7 @@ export const campusZones: Zone[] = [
   {
     id: 'eng-hub',
     name: '工程创新大楼',
+    emoji: '🏗️',
     color: '#13c2c2',
     position: { x: 20, y: 560, width: 460, height: 200 },
     equipment: ['3D打印机', '激光切割', 'GPU集群'],
@@ -84,6 +90,7 @@ export const campusZones: Zone[] = [
   {
     id: 'activity-center',
     name: '学生活动中心',
+    emoji: '👥',
     color: '#fa8c16',
     position: { x: 500, y: 560, width: 200, height: 200 },
     equipment: ['休闲沙发', '自动售货机'],
