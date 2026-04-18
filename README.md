@@ -1,46 +1,50 @@
-# 🏫 智慧校园调度系统 (Mr. Kaka)
+# 🏫 Mr.kaka：基于大模型与原子化知识库的智慧校园交互式调度系统
 
-基于腾讯云 AI 智能体 (LKE) 的校园教室智能推荐与调度平台。
+![Vue3](https://img.shields.io/badge/Vue-3.5-brightgreen.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg) ![AntDesign](https://img.shields.io/badge/Ant_Design_Vue-4.2-blue.svg)
 
-## 🚀 跨设备运行指南
+**Mr.kaka** 是一款集成了大语言模型 (LLM)、检索增强生成 (RAG) 与实时动态地图技术的智能校园调度管家。旨在解决校园空间资源错配、信息检索滞后等痛点，提供“对话即调度”的极致体验。
 
-如果您在另一台设备上克隆了本项目，请按照以下步骤进行环境配置：
+## ✨ 核心特色
 
-### 1. 克隆项目
-```bash
-git clone https://github.com/wakiwww/Mr.kaka.git
-cd Mr.kaka
-```
+### 🕵🏻‍♂️ 智能调度助手 - Mr.kaka
+*   **语义感知**：采用正则与智能匹配引擎，自动提取用户自然语言中的时间段（如 14:00-15:00）并进行冲突检测。
+*   **交互美学**：引入“深思熟虑”波浪加载动画，流式展现 AI 实时推理过程。
+*   **身份深度定制**：俏皮且专业的侦探助理形象，全链路 Emoji 视觉对齐。
 
-### 2. 安装依赖
-```bash
-npm install
-```
+### 📚 原子化知识库 (Atomic RAG)
+*   **高精度检索**：将校园空间数据拆分为 23 个原子化 Markdown 档案，彻底绕过大模型长文本幻觉。
+*   **即时同步**：地图状态、教室档案与 AI 知识源毫秒级同步，确保推荐信息的物理一致性。
 
-### 3. 配置环境变量 (关键步骤)
-由于安全原因，API 密钥不会上传到仓库。您需要手动创建配置文件：
-1. 在项目根目录下新建一个名为 `.env.local` 的文件。
-2. 参考 `.env.example` 的内容，填入您的腾讯云凭据：
-   * `VITE_TENCENT_SECRET_ID`
-   * `VITE_TENCENT_SECRET_KEY`
-   * `VITE_TENCENT_APP_KEY`
+### 🗺️ 2D 交互式动态地图
+*   **实时感知识别**：地图色块与 `bookings` 状态强绑定，支持点击下钻查看详细设备清单。
+*   **一键闭环预约**：AI 推荐后可直接唤起带有预填时间段的高级预约选择器。
 
-### 4. 启动开发服务器
-```bash
-npm run dev
-```
+## 🛠️ 技术架构
 
-## 🛠️ 技术栈
-- **前端框架**: Vue 3 + TypeScript
-- **构建工具**: Vite
-- **UI 组件库**: Ant Design Vue
-- **AI 交互**: WebSocket (Socket.IO v4) + 腾讯云 LKE
-- **状态管理**: Pinia
+*   **前端**: Vue 3.5 (Composition API) + Pinia 2.3
+*   **UI/UX**: Ant Design Vue 4.2 + Vanilla CSS (Sudan 风格)
+*   **数据通讯**: WebSocket (Socket.IO)
+*   **逻辑内核**: 腾讯云 LKE (RAG + LLM)
 
-## 📝 最近更新
-- **WebSocket 迁移**: 全面支持流式输出、思考过程展示。
-- **UI 优化**: 引入 Markdown 渲染，增强对话回复的可读性。
-- **签名修复**: 实现动态 Header 签名，确保 API 调用 100% 成功。
+## 🚀 启动指引
+
+1. **环境准备**:
+   ```bash
+   npm install
+   ```
+
+2. **变量配置**:
+   根目录新建 `.env.local`，填入签名凭据：
+   ```env
+   VITE_TENCENT_SECRET_ID=您的ID
+   VITE_TENCENT_SECRET_KEY=您的KEY
+   VITE_TENCENT_APP_KEY=您的APPKEY
+   ```
+
+3. **运行服务**:
+   ```bash
+   npm run dev
+   ```
 
 ---
-*注：本项目默认通过 Vite Proxy (`/tencent-api`) 解决浏览器跨域问题。*
+*本项目为 2026 中国大学生计算机设计大赛参赛作品。*
