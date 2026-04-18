@@ -4,7 +4,7 @@
     <div class="chat-history" ref="historyRef">
       <div v-if="messages.length === 0" class="empty-state">
         <div class="hero-section">
-          <div class="bot-avatar">🤖</div>
+          <div class="bot-avatar">👷‍♀️</div>
           <h1>您好，很高兴为您服务</h1>
           <p>我是校园智慧调度助手。您可以向我咨询教室地点、设备情况，或者直接发起预约需求。</p>
         </div>
@@ -22,16 +22,29 @@
         >
           <div class="avatar-area">
             <div class="avatar" :class="msg.role">
-              {{ msg.role === 'ai' ? '🤖' : 'U' }}
+              {{ msg.role === 'ai' ? '👷‍♀️' : '🤵‍♂️' }}
             </div>
           </div>
           
           <div class="content-area">
             <div class="role-name">{{ msg.role === 'ai' ? '智慧智体' : '您' }}</div>
             <div class="message-body">
-              <MarkdownRenderer v-if="msg.role === 'ai'" :content="msg.content" />
-              <div v-else class="user-text">{{ msg.content }}</div>
-              <div v-if="msg.isStreaming" class="typing-cursor"></div>
+              <!-- 当 AI 正在生成且内容为空时，显示深思熟虑动画 -->
+              <div v-if="msg.role === 'ai' && msg.isStreaming && !msg.content" class="loading-bubble-inline">
+                <div class="wave-loader">
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                </div>
+                <span class="loading-text">正在深思熟虑...</span>
+              </div>
+              
+              <!-- 正常渲染内容 -->
+              <template v-else>
+                <MarkdownRenderer v-if="msg.role === 'ai'" :content="msg.content" />
+                <div v-else class="user-text">{{ msg.content }}</div>
+                <div v-if="msg.isStreaming && msg.content" class="typing-cursor"></div>
+              </template>
             </div>
             
             <!-- 智能联动卡片集 -->
@@ -54,15 +67,7 @@
           </div>
         </div>
         
-        <!-- 加载中 (仅在没有正在生成的消息时显示) -->
-        <div v-if="isLoading && messages[messages.length-1]?.role !== 'ai'" class="message-row ai loading">
-          <div class="avatar-area"><div class="avatar ai">🤖</div></div>
-          <div class="content-area">
-            <div class="typing-indicator">
-              <span></span><span></span><span></span>
-            </div>
-          </div>
-        </div>
+        <!-- 正在生成的占位消息已在循环中处理，此处不再额外显示 -->
       </div>
     </div>
 
@@ -279,8 +284,16 @@ async function handleQuickBook(roomId: string | undefined) {
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-.avatar.ai { background: #f0f0f0; border: 1px solid #eee; }
-.avatar.user { background: #000; color: #fff; }
+.avatar.ai { 
+  background: #f8f9fa; 
+  border: 1px solid #e9ecef; 
+  color: #333;
+}
+.avatar.user { 
+  background: #f1f3f5; 
+  border: 1px solid #e9ecef;
+  color: #333; 
+}
 
 .content-area {
   flex: 1;
@@ -434,26 +447,54 @@ textarea {
   margin-top: 12px;
 }
 
-/* Indicators */
-.typing-indicator {
+/* 优雅加载器 - 行内模式 */
+.loading-bubble-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.loading-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  padding: 12px 20px;
+  border-radius: 4px 18px 18px 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.wave-loader {
   display: flex;
   gap: 4px;
-  padding: 8px 12px;
-  background: #f9f9f9;
-  border-radius: 10px;
-  width: fit-content;
 }
 
-.typing-indicator span {
-  width: 4px;
-  height: 4px;
-  background: #bbb;
+.wave-loader .dot {
+  width: 6px;
+  height: 6px;
+  background: #000;
   border-radius: 50%;
-  animation: bounce 1.4s infinite ease-in-out both;
+  opacity: 0.3;
+  animation: wave 1.2s infinite ease-in-out;
 }
 
-.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+.wave-loader .dot:nth-child(2) { animation-delay: 0.2s; }
+.wave-loader .dot:nth-child(3) { animation-delay: 0.4s; }
+
+.loading-text {
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(-4px); opacity: 1; }
+}
 
 .typing-cursor {
   display: inline-block;
