@@ -3,42 +3,28 @@
     <!-- 导航栏 -->
     <nav class="app-nav">
       <div class="nav-left">
-        <button 
-          :class="{ active: currentView === 'main' }"
-          @click="currentView = 'main'"
-        >
+        <button :class="{ active: currentView === 'main' }" @click="currentView = 'main'">
           🏫 智能调度
         </button>
-        <button 
-          :class="{ active: currentView === 'overview' }"
-          @click="currentView = 'overview'"
-        >
+        <button :class="{ active: currentView === 'overview' }" @click="currentView = 'overview'">
           📊 场所总览
         </button>
       </div>
-      <div class="nav-right">
-        <button 
-          :class="{ active: currentView === 'test' }"
-          @click="currentView = 'test'"
-        >
-          🤖 工作流调试
-        </button>
-      </div>
     </nav>
-    
+
     <!-- 主视图 -->
     <div v-if="currentView === 'main'" class="app-main-view">
       <main class="app-main">
         <div class="map-section">
           <CampusMap />
         </div>
-        
+
         <div class="chat-section">
           <ChatPanel />
         </div>
       </main>
     </div>
-    
+
     <!-- 场所总览 -->
     <div v-else-if="currentView === 'overview'" class="overview-view">
       <BookingOverview />
@@ -51,18 +37,14 @@
 
     <!-- 使用说明弹窗 -->
     <UsageInstructions ref="instructionsRef" />
-    
+
     <!-- 悬浮帮助按钮 -->
-    <a-button 
-      type="primary" 
-      shape="circle" 
-      size="large" 
-      class="help-fab"
-      @click="showInstructions"
-    >
-      <template #icon><QuestionOutlined /></template>
+    <a-button type="primary" shape="circle" size="large" class="help-fab" @click="showInstructions">
+      <template #icon>
+        <QuestionOutlined />
+      </template>
     </a-button>
-    
+
     <!-- 全局预约弹窗 -->
     <BookingModal />
   </div>
@@ -125,7 +107,7 @@ onUnmounted(() => {
   right: 24px;
   bottom: 24px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: #000 !important;
   border-color: #000 !important;
 }
@@ -147,7 +129,8 @@ onUnmounted(() => {
   border-bottom: 1px solid #eeeeee;
 }
 
-.nav-left, .nav-right {
+.nav-left,
+.nav-right {
   display: flex;
   gap: 8px;
 }
@@ -232,7 +215,7 @@ onUnmounted(() => {
   flex-direction: column;
   background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   position: relative;
 }
@@ -243,11 +226,12 @@ onUnmounted(() => {
   flex-direction: column;
   background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   min-width: 400px;
 }
 
-.test-view, .overview-view {
+.test-view,
+.overview-view {
   flex: 1;
   padding: 0;
   background: #ffffff;
