@@ -108,22 +108,92 @@ function scrollToBottom() {
   })
 }
 
+function extractTimeFromText(text: string) {
+  const now = new Date()
+  let targetDate = new Date(now)
+  
+  if (text.includes('明天') || text.includes('明日')) {
+    targetDate.setDate(targetDate.getDate() + 1)
+  } else if (text.includes('后天')) {
+    targetDate.setDate(targetDate.getDate() + 2)
+  }
+  const dateStr = targetDate.toISOString().split('T')[0]
+
+  let processedText = text
+    .replace(/十二/g, '12')
+    .replace(/十一/g, '11')
+    .replace(/十/g, '10')
+    .replace(/九/g, '9')
+    .replace(/八/g, '8')
+    .replace(/七/g, '7')
+    .replace(/六/g, '6')
+    .replace(/五/g, '5')
+    .replace(/四/g, '4')
+    .replace(/三/g, '3')
+    .replace(/两/g, '2')
+    .replace(/二/g, '2')
+    .replace(/一/g, '1')
+    .replace(/\s+/g, '')
+
+  const parseTime = (timeStr: string, contextIsPM: boolean) => {
+    let isPM = timeStr.includes('下午') || timeStr.includes('晚上') || timeStr.includes('晚') || contextIsPM
+    let isAM = timeStr.includes('上午') || timeStr.includes('早上') || timeStr.includes('早')
+    
+    // 注意：匹配数字和时间单位组合，避免单纯的数字匹配
+    const match = timeStr.match(/(\d{1,2})(?::(\d{2})|点(?:(\d{1,2})分?)?)/)
+    if (!match) return null
+    
+    let h = parseInt(match[1])
+    let m = 0
+    if (match[2]) m = parseInt(match[2])
+    else if (match[3]) m = parseInt(match[3])
+    else if (timeStr.includes('半')) m = 30
+    
+    if (isPM && h < 12) h += 12
+    if (isAM && h === 12) h = 0
+    if (!isPM && !isAM && h <= 11 && contextIsPM) h += 12
+    
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+  }
+
+  const isPMContext = processedText.includes('下午') || processedText.includes('晚上') || processedText.includes('晚')
+
+  // A. 匹配时间段 (如: 14:00-15:00, 下午3点到4点半)
+  const rangeRegex = /((?:上午|下午|早上|晚上)?\d{1,2}(?::\d{2}|点(?:\d{1,2}分?|半)?))[-到至]((?:上午|下午|早上|晚上)?\d{1,2}(?::\d{2}|点(?:\d{1,2}分?|半)?))/
+  const rangeMatch = processedText.match(rangeRegex)
+  if (rangeMatch) {
+    const start = parseTime(rangeMatch[1], isPMContext)
+    const end = parseTime(rangeMatch[2], isPMContext)
+    if (start && end) {
+      return { start: `${dateStr}T${start}:00`, end: `${dateStr}T${end}:00` }
+    }
+  }
+
+  // B. 匹配单点时间 (如: 下午4点, 明天上午5点)
+  const singleRegex = /(?:上午|下午|早上|晚上)?\d{1,2}(?::\d{2}|点(?:\d{1,2}分?|半)?)/g
+  const singleMatches = processedText.match(singleRegex)
+  if (singleMatches && singleMatches.length > 0) {
+    // 默认取句子中提取出的最后一个时间特征，作为目标调度时间
+    const lastMatch = singleMatches[singleMatches.length - 1]
+    const start = parseTime(lastMatch, isPMContext)
+    if (start) {
+      let [h, m] = start.split(':').map(Number)
+      let endH = h + 1 // 默认预约1小时
+      if (endH >= 24) endH = 23
+      const end = `${endH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+      return { start: `${dateStr}T${start}:00`, end: `${dateStr}T${end}:00` }
+    }
+  }
+
+  return null
+}
+
 function getDetectedRooms(text: string) {
   const detected: any[] = []
   const seenIds = new Set()
   
-  // 匹配时间段 (如 14:00-15:00)
-  const timeRegex = /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/
-  const timeMatch = text.match(timeRegex)
-  let extractedTimes: any = null
-  
-  if (timeMatch) {
-    const today = new Date().toISOString().split('T')[0]
-    extractedTimes = {
-      start: `${today}T${timeMatch[1].padStart(5, '0')}:00`,
-      end: `${today}T${timeMatch[2].padStart(5, '0')}:00`
-    }
-  }
+  // 提取语义时间段
+  let extractedTimes = extractTimeFromText(text)
 
   for (const zone of store.zones) {
     for (const room of zone.classrooms) {

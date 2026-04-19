@@ -4,10 +4,10 @@
     <nav class="app-nav">
       <div class="nav-left">
         <button :class="{ active: currentView === 'main' }" @click="currentView = 'main'">
-          🏫 智能调度
+          🏫 预约处
         </button>
         <button :class="{ active: currentView === 'overview' }" @click="currentView = 'overview'">
-          📊 场所总览
+          📊 场所情况总览
         </button>
       </div>
     </nav>
